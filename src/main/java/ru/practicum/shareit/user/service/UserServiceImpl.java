@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
     public UserDto findById(Long userId) {
         User user = users.get(userId);
         if (user == null) {
-            throw new RuntimeException("Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         }
         return UserMapper.toUserDto(user);
     }
