@@ -9,9 +9,15 @@ import lombok.Data;
 @Builder
 public class UserDto {
     private Long id;
-    @NotBlank(message = "Имя не может быть пустым")
+    @NotBlank(groups = Create.class, message = "Имя не может быть пустым")
     private String name;
-    @NotBlank(message = "Email не может быть пустым")
-    @Email(message = "Некорректный email")
+    @NotBlank(groups = Create.class, message = "Email не может быть пустым")
+    @Email(groups = {Create.class, Update.class}, message = "Некорректный email")
     private String email;
+
+    public interface Create {
+    }
+
+    public interface Update {
+    }
 }

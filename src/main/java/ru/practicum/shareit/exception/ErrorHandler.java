@@ -32,4 +32,10 @@ public class ErrorHandler {
         log.error("Ошибка 500: {}", e.getMessage(), e);
         return Map.of("error", "Произошла непредвиденная ошибка.");
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleAccessDenied(final AccessDeniedException e) {
+        return Map.of("error", e.getMessage());
+    }
 }

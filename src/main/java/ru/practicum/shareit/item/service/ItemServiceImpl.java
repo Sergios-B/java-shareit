@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.AccessDeniedException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
@@ -40,7 +41,7 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException("Вещь не найдена");
         }
         if (!item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("У пользователя нет такой вещи");
+            throw new AccessDeniedException("Доступ запрещен");
         }
         if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
             item.setName(itemDto.getName());
@@ -56,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto findById(Long itemId) {
+    public ItemDto findById(Long userId, Long itemId) {
         Item item = items.get(itemId);
         if (item == null) {
             throw new NotFoundException("Вещь не найдена");

@@ -44,11 +44,13 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new NotFoundException("Пользователь с указанным id не найден");
         }
-        if (userDto.getEmail() != null && !userDto.getEmail().equals(user.getEmail())) {
-            validateEmailUnique(userDto.getEmail());
-            user.setEmail(userDto.getEmail());
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
+            if (!userDto.getEmail().equals(user.getEmail())) {
+                validateEmailUnique(userDto.getEmail());
+                user.setEmail(userDto.getEmail());
+            }
         }
-        if (userDto.getName() != null) {
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
             user.setName(userDto.getName());
         }
         log.info("Обновлен пользователь с id: {}", userId);
