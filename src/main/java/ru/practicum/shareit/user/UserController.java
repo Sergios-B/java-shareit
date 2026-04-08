@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -17,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserDto create(@Validated(UserDto.Create.class) @RequestBody UserDto userDto) {
+    public UserDto create(@Valid @Validated(UserDto.Create.class) @RequestBody UserDto userDto) {
         log.info("Получен запрос на создание пользователя: {}", userDto);
         return userService.create(userDto);
     }
