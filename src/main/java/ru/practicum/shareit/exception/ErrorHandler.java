@@ -14,30 +14,24 @@ import java.util.Objects;
 @RestControllerAdvice
 public class ErrorHandler {
 
-    @ExceptionHandler
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleNotFound(final NotFoundException e) {
         log.error("Ошибка 404: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleConflict(final ConflictException e) {
         log.error("Ошибка 409: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleOtherExceptions(final Throwable e) {
-        log.error("Ошибка 500: {}", e.getMessage(), e);
-        return Map.of("error", "Произошла непредвиденная ошибка.");
-    }
-
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public Map<String, String> handleAccessDenied(final AccessDeniedException e) {
+        log.error("Ошибка 403: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
 
@@ -48,5 +42,12 @@ public class ErrorHandler {
         String message = Objects.requireNonNullElse(defaultMessage, "Ошибка валидации");
         log.error("Ошибка валидации 400: {}", message);
         return Map.of("error", message);
+    }
+
+    @ExceptionHandler(Throwable.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleOtherExceptions(final Throwable e) {
+        log.error("Непредвиденная ошибка 500: ", e);
+        return Map.of("error", "Произошла непредвиденная ошибка: " + e.getMessage());
     }
 }
