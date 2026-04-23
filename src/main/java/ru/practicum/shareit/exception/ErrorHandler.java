@@ -1,5 +1,6 @@
 package ru.practicum.shareit.exception;
 
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -49,5 +50,12 @@ public class ErrorHandler {
     public Map<String, String> handleOtherExceptions(final Throwable e) {
         log.error("Непредвиденная ошибка 500: ", e);
         return Map.of("error", "Произошла непредвиденная ошибка: " + e.getMessage());
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidation(final ValidationException e) {
+        log.error("Ошибка валидации 400: {}", e.getMessage());
+        return Map.of("error", e.getMessage());
     }
 }
