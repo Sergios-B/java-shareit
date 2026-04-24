@@ -44,7 +44,7 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException("Вещь недоступна для бронирования");
         }
         if (item.getOwner().getId().equals(userId)) {
-            throw new NotFoundException("Владелец не может бронировать свою вещь");
+            throw new ValidationException("Владелец не может бронировать свою вещь");
         }
         if (incomingDto.getEnd().isBefore(incomingDto.getStart()) || incomingDto.getEnd().isEqual(incomingDto.getStart())) {
             throw new ValidationException("Дата окончания не может быть раньше или равна дате начала");
@@ -58,6 +58,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDto updateStatus(Long userId, Long bookingId, Boolean approved) {
+        if (approved == null) {
+            throw new ValidationException("Параметр approved не может быть пустым");
+        }
+
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
 
