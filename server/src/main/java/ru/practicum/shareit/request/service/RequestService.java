@@ -9,7 +9,7 @@ import java.util.List;
 public interface RequestService {
     ItemRequestDto createRequest(CreateItemRequestDto itemRequest, Long userId);
 
-    List<ItemRequestDto> findAllMyRequests(Long userId, Pageable pageable);
+    List<ItemRequestDto> findAllMyRequests(Long userId);
 
     List<ItemRequestDto> findAllRequests(Long userId, Pageable pageable);
 

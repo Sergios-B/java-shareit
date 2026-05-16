@@ -27,14 +27,9 @@ import java.util.stream.Collectors;
 public class ItemBookingServiceImpl implements ItemBookingService {
 
     private final ItemRepository itemRepository;
-
     private final UserService userService;
-
     private final BookingRepository bookingRepository;
-
     private final CommentService commentService;
-
-    private final LocalDateTime now = LocalDateTime.now();
 
     @Override
     public List<ItemToOwnerDto> findItemsWithAfterAndBeforeBookingDateByUserId(Long userId) {
@@ -47,11 +42,10 @@ public class ItemBookingServiceImpl implements ItemBookingService {
         }
 
         List<Long> itemIds = items.stream().map(Item::getId).toList();
+        LocalDateTime now = LocalDateTime.now();
 
-        Map<Long, Booking> lastBooking = getLastBookingsByItemIds(itemIds);
-
-        Map<Long, Booking> firstBooking = getFirstBookingByItemIds(itemIds);
-
+        Map<Long, Booking> lastBooking = getLastBookingsByItemIds(itemIds, now);
+        Map<Long, Booking> firstBooking = getFirstBookingByItemIds(itemIds, now);
         Map<Long, List<Comment>> comments = getCommentsByItemIds(itemIds);
 
         return items.stream()
@@ -64,7 +58,7 @@ public class ItemBookingServiceImpl implements ItemBookingService {
                 .toList();
     }
 
-    private Map<Long, Booking> getLastBookingsByItemIds(List<Long> ids) {
+    private Map<Long, Booking> getLastBookingsByItemIds(List<Long> ids, LocalDateTime now) {
         return bookingRepository
                 .findAllByStatusNotAndStartLessThanAndItemIdInOrderByStartDesc(BookingStatus.REJECTED, now, ids)
                 .stream().collect(Collectors.toMap(
@@ -74,7 +68,7 @@ public class ItemBookingServiceImpl implements ItemBookingService {
                 ));
     }
 
-    private Map<Long, Booking> getFirstBookingByItemIds(List<Long> ids) {
+    private Map<Long, Booking> getFirstBookingByItemIds(List<Long> ids, LocalDateTime now) {
         return bookingRepository
                 .findAllByStatusNotAndStartGreaterThanAndItemIdInOrderByStartAsc(BookingStatus.REJECTED, now, ids)
                 .stream().collect(Collectors.toMap(
@@ -91,24 +85,25 @@ public class ItemBookingServiceImpl implements ItemBookingService {
 
     @Override
     public ItemToOwnerDto getItemById(Long id) {
-
         Optional<Item> item = itemRepository.findById(id);
 
         if (item.isEmpty()) {
-            throw new ItemNotFoundException("Вещь с таким id не найден");
+            throw new ItemNotFoundException("Вещь с таким id не найдена");
         }
 
-        Long itemId = item.get().getOwner().getId();
+        Item foundItem = item.get();
+        LocalDateTime now = LocalDateTime.now();
 
-        Map<Long, Booking> lastBooking = getLastBookingsByItemIds(List.of(itemId));
+        Map<Long, Booking> lastBooking = getLastBookingsByItemIds(List.of(id), now);
+        Map<Long, Booking> firstBooking = getFirstBookingByItemIds(List.of(id), now);
 
-        Map<Long, Booking> firstBooking = getFirstBookingByItemIds(List.of(itemId));
+        List<Comment> comments = commentService.findCommentsByItemIds(List.of(id));
 
-        List<Comment> comments = commentService.findCommentsByOwnerId(itemId);
-
-        return ItemMapper.toItemOwnerDto(item.get(),
-                firstBooking.getOrDefault(itemId, null),
-                lastBooking.getOrDefault(itemId, null),
-                comments);
+        return ItemMapper.toItemOwnerDto(
+                foundItem,
+                firstBooking.getOrDefault(id, null),
+                lastBooking.getOrDefault(id, null),
+                comments
+        );
     }
 }

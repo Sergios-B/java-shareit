@@ -7,10 +7,12 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.comment.CommentDto;
 import ru.practicum.shareit.item.dto.item.CreateItemDto;
 import ru.practicum.shareit.item.dto.item.ItemDto;
+import ru.practicum.shareit.item.dto.item.ItemForRequestDto;
 import ru.practicum.shareit.item.dto.item.ItemToOwnerDto;
 import ru.practicum.shareit.item.dto.item.UpdateItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemShortData;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.model.User;
 
@@ -76,5 +78,16 @@ public class ItemMapper {
         }
 
         return item;
+    }
+
+    public static ItemForRequestDto toItemForRequestDto(ItemShortData itemShortData) {
+        if (itemShortData == null) {
+            return null;
+        }
+        return ItemForRequestDto.builder()
+                .id(itemShortData.getId())
+                .name(itemShortData.getName())
+                .ownerId(itemShortData.getOwner())
+                .build();
     }
 }

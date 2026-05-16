@@ -2,6 +2,7 @@ package ru.practicum.shareit.request.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.ItemShortData;
 import ru.practicum.shareit.request.dto.CreateItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -18,7 +19,9 @@ public class RequestMapper {
                 .id(createRequest.getId())
                 .description(createRequest.getDescription())
                 .created(createRequest.getCreatedAt())
-                .items(items)
+                .items(items == null ? List.of() : items.stream()
+                        .map(ItemMapper::toItemForRequestDto)
+                        .toList())
                 .build();
     }
 

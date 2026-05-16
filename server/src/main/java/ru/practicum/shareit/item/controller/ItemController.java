@@ -23,9 +23,7 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
-
     private final ItemBookingService itemBookingService;
-
     private final CommentService commentService;
 
     @PostMapping
@@ -34,6 +32,7 @@ public class ItemController {
             @RequestBody CreateItemDto itemDto,
             @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
+        log.info("[ItemController.addItem] добавление вещи пользователем id={}", userId);
         return itemService.createItem(itemDto, userId);
     }
 
@@ -43,6 +42,7 @@ public class ItemController {
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @PathVariable Long itemId
     ) {
+        log.info("[ItemController.updateItem] обновление вещи id={} пользователем id={}", itemId, userId);
         return itemService.updateItem(itemDto, userId, itemId);
     }
 
@@ -50,6 +50,7 @@ public class ItemController {
     public ItemToOwnerDto findItemById(
             @PathVariable Long itemId
     ) {
+        log.info("[ItemController.findItemById] запрос вещи id={}", itemId);
         return itemBookingService.getItemById(itemId);
     }
 
@@ -57,6 +58,7 @@ public class ItemController {
     public List<ItemDto> searchActualItems(
             @RequestParam(required = false, defaultValue = "") String text
     ) {
+        log.info("[ItemController.searchActualItems] поиск вещей по строке: {}", text);
         return itemService.searchItemsByName(text);
     }
 
@@ -64,6 +66,7 @@ public class ItemController {
     public List<ItemToOwnerDto> findItemsByUserId(
             @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
+        log.info("[ItemController.findItemsByUserId] запрос всех вещей владельца id={}", userId);
         return itemBookingService.findItemsWithAfterAndBeforeBookingDateByUserId(userId);
     }
 
@@ -74,6 +77,7 @@ public class ItemController {
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @RequestBody CreateCommentDto commentDto
     ) {
+        log.info("[ItemController.addComment] добавление отзыва к вещи id={} от пользователя id={}", itemId, userId);
         return commentService.addComment(itemId, userId, commentDto);
     }
 }

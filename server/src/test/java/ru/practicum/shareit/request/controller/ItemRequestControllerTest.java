@@ -68,7 +68,7 @@ class ItemRequestControllerTest extends BaseUnitTest {
                 ItemRequestDto.builder().description("Request 2").build()
         );
 
-        when(requestService.findAllMyRequests(eq(USER_ID), any(Pageable.class))).thenReturn(requests);
+        when(requestService.findAllMyRequests(eq(USER_ID))).thenReturn(requests);
 
         mockMvc.perform(
                         get("/requests")
@@ -83,7 +83,7 @@ class ItemRequestControllerTest extends BaseUnitTest {
                 .andExpect(jsonPath("$[0].description").value(requests.getFirst().getDescription()))
                 .andExpect(jsonPath("$[1].description").value(requests.getLast().getDescription()));
 
-        verify(requestService).findAllMyRequests(eq(USER_ID), any(Pageable.class));
+        verify(requestService).findAllMyRequests(USER_ID);
     }
 
     @Test

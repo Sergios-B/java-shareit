@@ -29,6 +29,9 @@ import java.util.Random;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,7 +60,6 @@ class RequestServiceTest extends BaseUnitTest {
 
     @Test
     void should_returnException_whenNotAuthorized() {
-
         CreateItemRequestDto requestDto = new CreateItemRequestDto();
         requestDto.setDescription(MockGeneratorTest.generatorText(20));
 
@@ -70,7 +72,6 @@ class RequestServiceTest extends BaseUnitTest {
 
     @Test
     void should_returnRequest_whenItemRequestCreated() {
-
         String expectedRequestText = MockGeneratorTest.generatorText(20);
         long expectedRequestId = 1L;
 
@@ -92,7 +93,6 @@ class RequestServiceTest extends BaseUnitTest {
 
     @Test
     void should_returnRequestsList_whenFindByUserId() {
-
         int expectedRequestCount = 2;
 
         List<ItemRequest> requests = List.of(
@@ -106,8 +106,7 @@ class RequestServiceTest extends BaseUnitTest {
         when(requestRepository.findItemRequestsByRequestorIdWithItems(USER_ID)).thenReturn(requests);
         when(itemService.findAllByRequestIds(anyList())).thenReturn(List.of(itemData));
 
-        List<ItemRequestDto> allMyRequests = requestService.findAllMyRequests(USER_ID, Pageable.unpaged());
-
+        List<ItemRequestDto> allMyRequests = requestService.findAllMyRequests(USER_ID);
 
         Assertions.assertEquals(expectedRequestCount, allMyRequests.size());
     }
@@ -124,28 +123,36 @@ class RequestServiceTest extends BaseUnitTest {
 
     @Test
     void should_returnRequestsListAll() {
-
         int expectedRequestCount = 2;
 
         List<ItemRequest> requests = List.of(
-                ItemRequest.builder().id(1L).requestorId(USER_ID).build(),
-                ItemRequest.builder().id(2L).requestorId(USER_ID).build()
+                ItemRequest.builder().id(1L).requestorId(2L).build(),
+                ItemRequest.builder().id(2L).requestorId(3L).build()
         );
 
         Pageable pageable = Pageable.ofSize(requests.size());
+        ItemShortData itemData = getItemData();
 
         when(userService.findUserEntityByIdOrThrowAnException(USER_ID)).thenReturn(user);
-        when(requestRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(requests, pageable, requests.size()));
 
-        List<ItemRequestDto> allRequests = requestService.findAllRequests(USER_ID, Pageable.unpaged());
+        // ИСПРАВЛЕНО: мокаем правильный метод репозитория
+        when(requestRepository.findAllByRequestorIdNot(eq(USER_ID), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(requests, pageable, requests.size()));
+
+        // ИСПРАВЛЕНО: мокаем сопутствующий запрос к itemService
+        when(itemService.findAllByRequestIds(anyList())).thenReturn(List.of(itemData));
+
+        List<ItemRequestDto> allRequests = requestService.findAllRequests(USER_ID, pageable);
 
         assertThat(allRequests).isNotNull();
         Assertions.assertEquals(expectedRequestCount, allRequests.size());
+
+        verify(requestRepository).findAllByRequestorIdNot(eq(USER_ID), any(Pageable.class));
+        verify(itemService).findAllByRequestIds(anyList());
     }
 
     @Test
     void should_returnException_whenRequestByIdNotFound() {
-
         when(userService.findUserEntityByIdOrThrowAnException(USER_ID)).thenReturn(user);
         when(requestRepository.findItemRequestByWithItems(anyLong())).thenReturn(Optional.empty());
 
@@ -155,7 +162,6 @@ class RequestServiceTest extends BaseUnitTest {
 
     @Test
     void should_returnItemRequest_whenItemRequestFound() {
-
         ItemRequest itemRequest = ItemRequest.builder().id(requestId).requestorId(USER_ID).build();
 
         List<ItemShortData> items = List.of(

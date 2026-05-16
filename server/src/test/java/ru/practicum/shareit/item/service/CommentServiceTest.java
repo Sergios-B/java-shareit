@@ -102,9 +102,9 @@ class CommentServiceTest {
                 Comment.builder().id(2L).item(item).build()
         );
 
-        when(commentRepository.findAllByItemIdInOrderByCreatedAt(anyList())).thenReturn(comments);
+        when(commentRepository.findAllByItemIdInOrderByCreatedAtDesc(anyList())).thenReturn(comments);
 
-        List<Comment> findComments = commentRepository.findAllByItemIdInOrderByCreatedAt(List.of(item.getId()));
+        List<Comment> findComments = commentRepository.findAllByItemIdInOrderByCreatedAtDesc(List.of(item.getId()));
 
         Assertions.assertThat(findComments)
                 .hasSize(expectedCommentCount)
@@ -112,7 +112,7 @@ class CommentServiceTest {
                 .hasFieldOrPropertyWithValue("id", comments.getFirst().getId())
                 .hasFieldOrPropertyWithValue("item.id", item.getId());
 
-        verify(commentRepository).findAllByItemIdInOrderByCreatedAt(List.of(item.getId()));
+        verify(commentRepository).findAllByItemIdInOrderByCreatedAtDesc(List.of(item.getId()));
     }
 
     @Test

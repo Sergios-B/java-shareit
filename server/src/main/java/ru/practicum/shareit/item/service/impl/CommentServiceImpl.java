@@ -54,7 +54,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<Comment> findCommentsByItemIds(List<Long> itemIds) {
-        return commentRepository.findAllByItemIdInOrderByCreatedAt(itemIds);
+        return commentRepository.findAllByItemIdInOrderByCreatedAtDesc(itemIds);
     }
 
     @Override
