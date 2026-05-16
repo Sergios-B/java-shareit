@@ -133,9 +133,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public boolean existsBookingByUserIdAndItemId(Long itemId, Long userId) {
         return bookingRepository.existsByItemIdAndBookerIdAndStatusAndEndBefore(
-                itemId, userId, BookingStatus.APPROVED, LocalDateTime.now()
+                itemId, userId, BookingStatus.APPROVED, LocalDateTime.now().plusSeconds(5)
         );
     }
+
 
     public Booking findBookingEntityByIdOrThrowAnException(Long id) {
         return bookingRepository.findById(id)
