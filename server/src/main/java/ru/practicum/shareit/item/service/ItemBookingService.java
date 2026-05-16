@@ -8,5 +8,5 @@ public interface ItemBookingService {
 
     List<ItemToOwnerDto> findItemsWithAfterAndBeforeBookingDateByUserId(Long userId);
 
-    ItemToOwnerDto getItemById(Long id);
+    ItemToOwnerDto getItemById(Long id, Long userId);
 }

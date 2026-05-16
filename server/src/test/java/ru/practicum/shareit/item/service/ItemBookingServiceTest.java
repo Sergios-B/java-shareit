@@ -48,6 +48,8 @@ class ItemBookingServiceTest {
     private ItemBookingServiceImpl itemBookingService;
 
     private User owner;
+    private Item item;
+    private final Long expectedId = 1L;
 
     @BeforeEach
     public void setUp() {
@@ -56,24 +58,30 @@ class ItemBookingServiceTest {
                 .email("example.yandex.com")
                 .name("Albert")
                 .build();
-    }
 
-    @Test
-    void should_returnItem_whenExists() {
-
-        Long expectedId = 1L;
-
-        Item item = Item.builder()
+        item = Item.builder()
                 .id(expectedId)
                 .name("Item title")
                 .description("Item description")
                 .available(true)
                 .owner(owner)
                 .build();
+    }
 
+    @Test
+    void should_returnItemWithBookings_whenRequestByOwner() {
+        // Учим репозиторий возвращать вещь
         when(itemRepository.findById(expectedId)).thenReturn(Optional.of(item));
 
-        ItemToOwnerDto finedItem = itemBookingService.getItemById(expectedId);
+        // Мокаем вызовы бронирований и комментариев, так как запрос делает ВЛАДЕЛЕЦ (id = 1)
+        when(bookingRepository.findAllByStatusNotAndStartLessThanAndItemIdInOrderByStartDesc(any(), any(), anyList()))
+                .thenReturn(List.of());
+        when(bookingRepository.findAllByStatusNotAndStartGreaterThanAndItemIdInOrderByStartAsc(any(), any(), anyList()))
+                .thenReturn(List.of());
+        when(commentService.findCommentsByItemIds(anyList())).thenReturn(List.of());
+
+        // Вызываем обновленный метод с двумя параметрами (itemId, userId)
+        ItemToOwnerDto finedItem = itemBookingService.getItemById(expectedId, owner.getId());
 
         AssertionsForClassTypes.assertThat(finedItem)
                 .isNotNull()
@@ -84,8 +92,29 @@ class ItemBookingServiceTest {
     }
 
     @Test
-    void should_returnListItem_whenFindItemsWithAfterAndBeforeBookingDateByUserId() {
+    void should_returnItemWithoutBookings_whenRequestByNotOwner() {
+        Long notOwnerId = 999L; // Чужой пользователь
 
+        when(itemRepository.findById(expectedId)).thenReturn(Optional.of(item));
+        // Для не-владельца запрашиваются ТОЛЬКО комментарии
+        when(commentService.findCommentsByItemIds(anyList())).thenReturn(List.of());
+
+        // Вызываем метод от лица чужого пользователя
+        ItemToOwnerDto finedItem = itemBookingService.getItemById(expectedId, notOwnerId);
+
+        AssertionsForClassTypes.assertThat(finedItem)
+                .isNotNull()
+                .hasFieldOrPropertyWithValue("id", expectedId);
+
+        // Проверяем, что бронирования строго null, как требует ТЗ
+        Assertions.assertThat(finedItem.getLastBooking()).isNull();
+        Assertions.assertThat(finedItem.getNextBooking()).isNull();
+
+        verify(itemRepository).findById(expectedId);
+    }
+
+    @Test
+    void should_returnListItem_whenFindItemsWithAfterAndBeforeBookingDateByUserId() {
         int expectedCount = 3;
 
         List<Item> items = List.of(

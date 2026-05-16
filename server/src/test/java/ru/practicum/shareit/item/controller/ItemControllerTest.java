@@ -121,7 +121,7 @@ class ItemControllerTest extends BaseUnitTest {
                 .description(mockDescription)
                 .build();
 
-        when(itemBookingService.getItemById(anyLong())).thenReturn(item);
+        when(itemBookingService.getItemById(anyLong(), anyLong())).thenReturn(item);
 
         mockMvc.perform(
                 get("/items/{itemId}", mockItemId)
@@ -130,7 +130,7 @@ class ItemControllerTest extends BaseUnitTest {
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
 
-        verify(itemBookingService).getItemById(eq(mockItemId));
+        verify(itemBookingService).getItemById(eq(mockItemId), eq(USER_ID));
     }
 
     @Test

@@ -48,11 +48,13 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemToOwnerDto findItemById(
-            @PathVariable Long itemId
+            @PathVariable Long itemId,
+            @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
-        log.info("[ItemController.findItemById] запрос вещи id={}", itemId);
-        return itemBookingService.getItemById(itemId);
+        log.info("[ItemController.findItemById] запрос вещи id={} от пользователя id={}", itemId, userId);
+        return itemBookingService.getItemById(itemId, userId);
     }
+
 
     @GetMapping("/search")
     public List<ItemDto> searchActualItems(

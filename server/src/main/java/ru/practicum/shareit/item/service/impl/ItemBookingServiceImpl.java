@@ -84,7 +84,7 @@ public class ItemBookingServiceImpl implements ItemBookingService {
     }
 
     @Override
-    public ItemToOwnerDto getItemById(Long id) {
+    public ItemToOwnerDto getItemById(Long id, Long userId) { // ИСПРАВЛЕНО: Добавлен параметр userId
         Optional<Item> item = itemRepository.findById(id);
 
         if (item.isEmpty()) {
@@ -94,15 +94,23 @@ public class ItemBookingServiceImpl implements ItemBookingService {
         Item foundItem = item.get();
         LocalDateTime now = LocalDateTime.now();
 
-        Map<Long, Booking> lastBooking = getLastBookingsByItemIds(List.of(id), now);
-        Map<Long, Booking> firstBooking = getFirstBookingByItemIds(List.of(id), now);
+        Booking lastBooking = null;
+        Booking firstBooking = null;
+
+        if (foundItem.getOwner().getId().equals(userId)) {
+            Map<Long, Booking> lastBookingsMap = getLastBookingsByItemIds(List.of(id), now);
+            Map<Long, Booking> firstBookingsMap = getFirstBookingByItemIds(List.of(id), now);
+
+            lastBooking = lastBookingsMap.getOrDefault(id, null);
+            firstBooking = firstBookingsMap.getOrDefault(id, null);
+        }
 
         List<Comment> comments = commentService.findCommentsByItemIds(List.of(id));
 
         return ItemMapper.toItemOwnerDto(
                 foundItem,
-                firstBooking.getOrDefault(id, null),
-                lastBooking.getOrDefault(id, null),
+                firstBooking,
+                lastBooking,
                 comments
         );
     }

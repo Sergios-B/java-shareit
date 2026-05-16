@@ -56,14 +56,15 @@ public class ItemServiceTest {
 
     @Test
     public void should_returnException_whenItemDoesNotExist() {
-
         Long expectedId = 1L;
+        Long userId = 1L;
 
         when(itemRepository.findById(expectedId)).thenReturn(Optional.empty());
 
-        assertThrows(ItemNotFoundException.class,
-                () -> itemBookingService.getItemById(expectedId));
+        org.junit.jupiter.api.Assertions.assertThrows(ItemNotFoundException.class,
+                () -> itemBookingService.getItemById(expectedId, userId));
     }
+
 
     @Test
     public void should_returnUserNotFoundException_whenUserIdNotExistsWhenUpdateItem() {
