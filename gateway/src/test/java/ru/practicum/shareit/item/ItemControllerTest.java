@@ -126,8 +126,7 @@ class ItemControllerTest extends BaseUnitTest {
 
     @Test
     void shouldReturnStatus200_whenExistItemById() throws Exception {
-
-        when(itemClient.getItemById(anyLong()))
+        when(itemClient.getItemById(anyLong(), anyLong()))
                 .thenReturn(ResponseEntity.ok().build());
 
         mockMvc.perform(
@@ -138,7 +137,7 @@ class ItemControllerTest extends BaseUnitTest {
                 )
                 .andExpect(status().isOk());
 
-        verify(itemClient).getItemById(itemId);
+        verify(itemClient).getItemById(eq(itemId), eq(USER_ID));
     }
 
     @Test

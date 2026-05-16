@@ -36,14 +36,12 @@ public class ItemClient extends BaseClient {
         return patch("/" + itemId,  userId, itemDto);
     }
 
-    public Object getItemById(Long itemId) {
-        return get("/" + itemId);
+    public Object getItemById(Long itemId, Long userId) {
+        return get("/" + itemId, userId);
     }
 
     public Object searchItemsByName(Long userid, String text) {
-
         Map<String, Object> parameters = Map.of("text", text);
-
         return get("/search?text={text}", userid, parameters);
     }
 
